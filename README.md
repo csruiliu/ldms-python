@@ -1,6 +1,53 @@
 # LDMS Tutorial
 
-This is a quick tutorial for LDMS (Lightweight Distributed Metric Service), which mainly focuses on how to use LDMS client APIs.  
+This is a quick tutorial for LDMS (Lightweight Distributed Metric Service), which mainly focuses on high-level (or basic) understanding and LDMS client APIs usuage.  
+
+LDMS is designed to: (1) collect metrics from a variety of sources, including system hardware, OS, network, and applications, (2) be lightweight and scalable, making it suitable for large-scale systems, (3) provide both local and distributed metric collection, and (4) allow for real-time monitoring and data storage for historical analysis.
+
+## LDMS Daemon
+
+LDMS daemon (`ldmsd`) is a core component in LDMS, which is in `/ldms/src/ldmsd`. As a daemon process, `ldmsd` is launched and runs all the time at the server where the jobs are submitted to. It is responsible for coordinating the collection, storage, and distribution of metrics using sampler plugins and store plugins. 
+
+The `ldmsd` daemon is typically started with a configuration specifying:
+
++ Sampler plugins to load (e.g., CPU, memory, network).
++ Store plugins to define how and where metrics are stored.
++ Aggregation settings for data collected across multiple nodes.
++ Communication settings (e.g., TCP, RDMA) for interacting with other LDMS instances or clients.
+
+The frequency at which ldmsd (the LDMS daemon) checks running jobs depends on its sampling interval, which is configured in the LDMS configuration files, such as `ldmsd_config.c`. Each sampler plugin in LDMS has a configurable sampling interval, specifying how often it collects metrics.
+
+More configuration details about `ldmsd` can be found in `/ldms/etc` and `/ldms/src/ldmsd/ldmsd_config.c`.
+
+
+## Sample Plugins
+
+Plugins are a critical part of LDMS. The sampler plugins collect metrics from specific sources (e.g., CPU utilization, memory usage, network stats). More details can be found in `/ldms/src/sampler`.
+
+**1. Hardware Performance Counters:**
+
+LDMS interfaces with hardware performance counters through plugins that utilize libraries like PAPI and RAPL. 
+
++ PAPI (Performance Application Programming Interface): Some LDMS configurations may leverage PAPI, a widely-used library that abstracts hardware performance counters. PAPI allows LDMS to gather detailed hardware metrics without directly interacting with low-level APIs. See more details in `/ldms/src/sampler/papi/papi_sampler.c`.
+
++ RAPL (Running Average Power Limit): LDMS can gather energy-related metrics from Intel CPUs using RAPL counters, which provide data about energy consumption for CPUs, DRAM, and other components. See more details in `/ldms/src/sampler/rapl/rapl.c`.
+
+**2. System Calls:**
+
+LDMS uses system calls in several sampler plugins to interact with the underlying Linux kernel and gather system metrics directly. 
+
+For instance, for accessing hardware performance counters, LDMS may use the `perf_event_open()` system call, which is part of the Linux perf subsystem. This is common in plugins like papi or custom hardware monitoring. Also, LDMS may use the `ioctl()` system call for interacting with specific devices or subsystems, such as collecting metrics from RDMA devices and monitoring specific hardware components.
+
+LDMS also collects system-level metrics by reading from the `/proc` filesystem and making system calls. For example, the sampler/procstat plugin gathers CPU statistics by reading `/proc/stat`, get `/proc/meminfo` by reading `/proc/meminfo`, and geting network statistics by reading `/proc/net/dev`
+
+## Store Plugins
+
+Store plugins in LDMS are responsible for exporting collected metrics from the LDMS daemon to external storage systems, databases, or files for analysis and persistence. More details can be found in `/ldms/src
+/store`.
+
+There are some commonly store methods. For example, **store_csv** exports metrics to CSV files, each metric set is written as a row in a CSV file, more details in `/ldms/src/store/store_csv.c`; **store_influx** exports metrics to an InfluxDB time-series database, metrics are written as time-series data with tags for filtering, more details in `/ldms/src/store/`.
+
+## Inovking LDMS APIs
 
 1. **ldms_auth_client_interface.py**: wrappers for the LDMS API calls.
 
