@@ -1,6 +1,8 @@
 # User-defined files
 iris_sfapi_client_credentials.py
 *.pdf
+*.csv
+*.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
