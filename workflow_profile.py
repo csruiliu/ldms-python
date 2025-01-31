@@ -1,4 +1,5 @@
 import os
+import shutil
 import argparse
 import pandas as pd
 import seaborn as sns
@@ -11,10 +12,11 @@ from iris_sfapi_client_credentials import client_id, private_key
 from metric_dict import metrics_descriptions
 
 
-def create_folder(folder_name):
-    folder = Path(folder_name)
-    folder.mkdir(parents=True, exist_ok=True)
-    print(f"Folder '{folder_name}' created successfully!")
+def create_folder(folder_path):
+    """Delete the folder if it exists and create a new one."""
+    if os.path.exists(folder_path):
+        shutil.rmtree(folder_path)  # Delete the old folder
+    os.makedirs(folder_path)  # Create a new one
 
 
 def client_setup():
@@ -82,8 +84,6 @@ def main():
     # get all parameters
     ###################################
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--csv_file', action='store', type=str,
-                        help='indicate the csv file which contains job, user, and machine id')
     parser.add_argument('-j', '--job_id', action='store', type=str,
                         help='indicate the job id you want to profile')
     parser.add_argument('-u', '--user_id', action='store', type=str,
@@ -98,8 +98,12 @@ def main():
                         help='indicate the targeted metric for plotting')
     args = parser.parse_args()
 
+    job_id = args.job_id
+    user_id = args.user_id
+    machine_id = args.machine_id
     profile_time_unit = args.profile_time_unit
     profile_time_utc = args.profile_time_utc
+    metric_plot = args.metric_plot
 
     metrics_profile_cpu = ["cpu_vmstat_mem_free", 
                            "cpu_vmstat_io_bi", 
@@ -107,77 +111,40 @@ def main():
 
     metrics_profile_gpu = ["gpu_dcgm_fb_used",
                            "gpu_dcgm_gpu_utilization"]
-
+    print(f"[Python] Processing: {job_id}, {user_id}, {machine_id}")
+    
+    if machine_id == "perlmutter cpu":
+        metrics_list_profile = metrics_profile_cpu
+    elif machine_id == "perlmutter gpu":
+        metrics_list_profile = metrics_profile_gpu
+    else:
+        raise Exception("Sorry, machine id is not recognized")
+    
     # setup LDMS client
     client_session = client_setup()
 
-    if args.csv_file:
-        csv_file = args.csv_file
-        df_csv = pd.read_csv(csv_file)
+    try:
+        df_profile = fetch_profile(client_session, user_id, job_id, machine_id, metrics_list_profile)
+    except ValueError as e:
+        print(f"Error processing {job_id}: {e}")
 
-        for index, row in df_csv.iterrows():
-            job_id = row["JobIDRaw"]
-            user_id = row["User"]
-            machine_id = row["Host Name"]
-
-            if machine_id == "perlmutter cpu":
-                metrics_list_profile = metrics_profile_cpu
-            elif machine_id == "perlmutter gpu":
-                metrics_list_profile = metrics_profile_gpu
-            else:
-                raise Exception("Sorry, machine id is not recognized")
-
-            print(f"Job ID: {job_id}, User ID: {user_id}, Machine ID: {machine_id}")
-
-            try:
-                df_profile = fetch_profile(client_session, user_id, job_id, machine_id, metrics_list_profile)
-            except ValueError as e:
-                print(f"Error processing {job_id}: {e}")
-                continue
-
-            # Profile the workflow
-            df_profile_refine = refine_profile(df_profile, 
-                                               metrics_list_profile, 
-                                               profile_time_unit, 
-                                               profile_time_utc)
-        
-            job_folder = "job-" + job_id
-            create_folder(job_folder)
-
-            # Plot the profile data
-            for m in metrics_list_profile:
-                output_path = os.getcwd() + "/" + job_folder + "/" + m
-                plot_job(df_profile_refine, output_path, m)
-
-    else: 
-        job_id = args.job_id
-        user_id = args.user_id
-        metric_plot = args.metric_plot
-
-        if args.machine_id == "cpu":
-            machine_id = "perlmutter cpu"
-            metrics_list_profile = metrics_profile_cpu
-        elif args.machine_id == "gpu":
-            machine_id = "perlmutter gpu"
-            metrics_list_profile = metrics_profile_gpu
-        else:
-            raise Exception("Sorry, machine id is not recognized")
-
-        try:
-            df_profile = fetch_profile(client_session, user_id, job_id, machine_id, metrics_list_profile)
-        except ValueError as e:
-            print(f"Error processing {job_id}: {e}")
-
-        # Profile the workflow
-        df_profile_refine = refine_profile(df_profile, 
-                                           metrics_list_profile, 
-                                           profile_time_unit, 
-                                           profile_time_utc)
-
-        output_path = os.getcwd() + "/profile_results/" + job_id + "/" + metric_plot
-
-        plot_job(df_profile_refine, output_path, metric_plot)
+    # Profile the workflow
+    df_profile_refine = refine_profile(df_profile, 
+                                       metrics_list_profile, 
+                                       profile_time_unit, 
+                                       profile_time_utc)
     
+    job_folder = os.getcwd() + "/profile_results/" + job_id
+    create_folder(job_folder)
+
+    # Plot the profile data
+    if metric_plot is None:
+        for m in metrics_list_profile:
+            output_path = job_folder + "/" + m
+            plot_job(df_profile_refine, output_path, m)
+    else:
+        output_path = os.getcwd() + "/profile_results/" + job_id + "/" + metric_plot
+        plot_job(df_profile_refine, output_path, metric_plot)
     
     
 if __name__=="__main__":
