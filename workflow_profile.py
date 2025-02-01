@@ -13,10 +13,15 @@ from metric_dict import metrics_descriptions
 
 
 def create_folder(folder_path):
-    """Delete the folder if it exists and create a new one."""
+    '''
+    # Delete the folder if it exists and create a new one."""
     if os.path.exists(folder_path):
-        shutil.rmtree(folder_path)  # Delete the old folder
-    os.makedirs(folder_path)  # Create a new one
+        shutil.rmtree(folder_path)
+    os.makedirs(folder_path)
+    '''
+    # Creates folder if it does not exist
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
 
 
 def client_setup():
@@ -105,12 +110,27 @@ def main():
     profile_time_utc = args.profile_time_utc
     metric_plot = args.metric_plot
 
-    metrics_profile_cpu = ["cpu_vmstat_mem_free", 
+    metrics_profile_cpu = ["cpu_vmstat_cpu_id", 
                            "cpu_vmstat_io_bi", 
-                           "cpu_vmstat_io_bo"]
+                           "cpu_vmstat_io_bo",
+                           "cpu_vmstat_mem_buff",
+                           "cpu_vmstat_mem_swpd",
+                           "cpu_vmstat_mem_free",
+                           "cpu_vmstat_procs_r", 
+                           "cpu_vmstat_system_in", 
+                           "cpu_vmstat_system_cs"]
 
-    metrics_profile_gpu = ["gpu_dcgm_fb_used",
-                           "gpu_dcgm_gpu_utilization"]
+    metrics_profile_gpu = ["gpu_dcgm_gpu_utilization",
+                           "gpu_dcgm_tensor_active",
+                           "gpu_dcgm_sm_active",
+                           "gpu_dcgm_fb_used", 
+                           "gpu_dcgm_pcie_rx_throughput", 
+                           "gpu_dcgm_pcie_tx_throughput", 
+                           "gpu_dcgm_nvlink_bandwidth_total", 
+                           "gpu_dcgm_fp16_active", 
+                           "gpu_dcgm_fp32_active", 
+                           "gpu_dcgm_fp64_active"]
+    
     print(f"[Python] Processing: {job_id}, {user_id}, {machine_id}")
     
     if machine_id == "perlmutter cpu":
@@ -134,7 +154,7 @@ def main():
                                        profile_time_unit, 
                                        profile_time_utc)
     
-    job_folder = os.getcwd() + "/profile_results/" + job_id
+    job_folder = os.getcwd() + "/profile_results/" + job_id + "-" + machine_id.split()[-1]
     create_folder(job_folder)
 
     # Plot the profile data
@@ -143,7 +163,7 @@ def main():
             output_path = job_folder + "/" + m
             plot_job(df_profile_refine, output_path, m)
     else:
-        output_path = os.getcwd() + "/profile_results/" + job_id + "/" + metric_plot
+        output_path = job_folder + "/" + metric_plot
         plot_job(df_profile_refine, output_path, metric_plot)
     
     
