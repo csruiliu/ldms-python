@@ -70,7 +70,7 @@ def refine_profile(profile_df,
     return profile_df
 
 
-def plot_job(profile_data, outpath, target_metric):
+def plot_job(profile_data, outpath, target_metric, plot_format):
     fig, ax = plt.subplots(figsize=(24,16))
     sns.set_context('poster')
     sns.lineplot(x="Time",y=metrics_descriptions.get(target_metric), 
@@ -81,7 +81,7 @@ def plot_job(profile_data, outpath, target_metric):
     plt.ylabel(metrics_descriptions.get(target_metric), fontsize=24)
     plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H-%M-%S'))
     
-    plt.savefig(outpath + ".pdf", format='pdf', bbox_inches='tight', pad_inches=0.05)
+    plt.savefig(outpath + "." + plot_format, format=plot_format, bbox_inches='tight', pad_inches=0.05)
     
 
 def main():
@@ -101,6 +101,8 @@ def main():
                         help='indicate if utc time format is applied')
     parser.add_argument('-mp', '--metric_plot', action='store', type=str,
                         help='indicate the targeted metric for plotting')
+    parser.add_argument('-pf', '--plot_format', action='store', type=str, choices=["png", "pdf", "svg", "eps"],
+                        help='indicate the format for the plots')
     args = parser.parse_args()
 
     job_id = args.job_id
@@ -109,6 +111,7 @@ def main():
     profile_time_unit = args.profile_time_unit
     profile_time_utc = args.profile_time_utc
     metric_plot = args.metric_plot
+    plot_format = args.plot_format
 
     metrics_profile_cpu = ["cpu_vmstat_cpu_id", 
                            "cpu_vmstat_io_bi", 
@@ -136,7 +139,7 @@ def main():
     if machine_id == "perlmutter cpu":
         metrics_list_profile = metrics_profile_cpu
     elif machine_id == "perlmutter gpu":
-        metrics_list_profile = metrics_profile_gpu
+        metrics_list_profile = metrics_profile_cpu + metrics_profile_gpu
     else:
         raise Exception("Sorry, machine id is not recognized")
     
@@ -161,10 +164,10 @@ def main():
     if metric_plot is None:
         for m in metrics_list_profile:
             output_path = job_folder + "/" + m
-            plot_job(df_profile_refine, output_path, m)
+            plot_job(df_profile_refine, output_path, m, plot_format)
     else:
         output_path = job_folder + "/" + metric_plot
-        plot_job(df_profile_refine, output_path, metric_plot)
+        plot_job(df_profile_refine, output_path, metric_plot, plot_format)
     
     
 if __name__=="__main__":

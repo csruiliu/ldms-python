@@ -21,6 +21,6 @@ do
     echo "[Bash] Processing: $job, $user, $machine"
     
     MACHINE_REFINE=${machine//\"/}
-    python3 workflow_profile.py -j "$job" -u "$user" -m "$MACHINE_REFINE" -tu "s" -utc "True"
+    python3 workflow_profile.py -j "$job" -u "$user" -m "$MACHINE_REFINE" -tu "s" -utc "True" -pf "png"
 done
 
