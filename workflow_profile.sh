@@ -15,6 +15,8 @@ if [ ! -f "$CSV_FILE" ]; then
     exit 1
 fi
 
+start_time=$(date +%s)
+
 # Read the CSV file line by line (skipping the header)
 tail -n +2 "$CSV_FILE" | while IFS=, read -r job user machine misc
 do
@@ -24,3 +26,12 @@ do
     python3 workflow_profile.py -j "$job" -u "$user" -m "$MACHINE_REFINE" -tu "s" -utc "True" -pf "png"
 done
 
+end_time=$(date +%s)
+duration=$((end_time - start_time))
+
+# Convert seconds into hours, minutes, and seconds
+hours=$((duration / 3600))
+minutes=$(((duration % 3600) / 60))
+seconds=$((duration % 60))
+
+echo "Total duration: ${hours}h ${minutes}m ${seconds}s"
