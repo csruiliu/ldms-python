@@ -1,13 +1,45 @@
 #!/bin/bash
 
-# Check if the user provided a CSV file as an argument
-if [ "$#" -ne 1 ]; then
-    echo "Usage: $0 <csv_file>"
+# Function to display usage information
+usage() {
+    echo "Usage: $0 -i input_csv -o output_dir"
     exit 1
+}
+
+# Parse command-line arguments using getopts
+while getopts ":i:o:" opt; do
+    case "${opt}" in
+        i)
+            CSV_FILE=${OPTARG}
+            ;;
+        o)
+            RESULTS_FOLDER=${OPTARG}
+            ;;
+        *)
+            usage
+            ;;
+    esac
+done
+
+# Ensure both input CSV file and output directory are provided
+if [ -z "${INPUT_CSV}" ] || [ -z "${OUTPUT_DIR}" ]; then
+    echo "Error: Both input CSV file and output directory must be specified."
+    usage
 fi
 
-CSV_FILE="$1"
-RESULTS_FOLDER="profile_results"
+# Check if the folder exists
+if [ ! -d "$RESULTS_FOLDER" ]; then
+    echo "Directory '$RESULTS_FOLDER' does not exist. Creating now..."
+    mkdir -p "$RESULTS_FOLDER"
+    if [ $? -eq 0 ]; then
+        echo "Directory '$RESULTS_FOLDER' created successfully."
+    else
+        echo "Failed to create directory '$RESULTS_FOLDER'."
+        exit 1
+    fi
+else
+    echo "Directory '$RESULTS_FOLDER' already exists."
+fi
 
 # Check if the file exists
 if [ ! -f "$CSV_FILE" ]; then
