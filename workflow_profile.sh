@@ -22,7 +22,7 @@ while getopts ":i:o:" opt; do
 done
 
 # Ensure both input CSV file and output directory are provided
-if [ -z "${INPUT_CSV}" ] || [ -z "${OUTPUT_DIR}" ]; then
+if [ -z "${CSV_FILE}" ] || [ -z "${RESULTS_FOLDER}" ]; then
     echo "Error: Both input CSV file and output directory must be specified."
     usage
 fi
