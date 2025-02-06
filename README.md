@@ -55,6 +55,7 @@ There are some commonly store methods. For example, **store_csv** exports metric
 
 3. **demo_template.py**: You can add `job_id`, `user_id`, `machine id`, etc to run some demos. `job_id` can be found using Slurm. `userid` is the user that submitted the job. The It seems that `machine id` could be `perlmutter cpu` or `perlmutter gpu`. Currently, Iris has no concept of job steps. Multiple metrics may be fetched at once, this will result in only one query at the backend. Sometimes jobs are requeued, the APIs will include all restarts (different nodelist and start and end). 
 
+4. There is a limitation on the metric list: the maximum allowed length is 10. Additionally, if errors such as "max retries exceeded with url: /list_metrics" occur repeatedly, adding a short waiting time (e.g., 1–2 seconds) between requests may help mitigate the issue.
 
 Ackknowledgement:
 -----

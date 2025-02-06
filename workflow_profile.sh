@@ -53,9 +53,10 @@ start_time=$(date +%s)
 tail -n +2 "$CSV_FILE" | while IFS=, read -r job user machine misc
 do
     echo "[Bash] Processing: $job, $user, $machine"
-    
     MACHINE_REFINE=${machine//\"/}
     python3 workflow_profile.py -j "$job" -u "$user" -m "$MACHINE_REFINE" -tu "s" -utc "True" -pf "png"
+    # add some gap between any two requests to avoid some potential internal rate limit
+    sleep 2
 done
 
 end_time=$(date +%s)
