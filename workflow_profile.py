@@ -116,9 +116,8 @@ def main():
     metrics_profile_cpu = ["cpu_vmstat_cpu_id", 
                            "cpu_vmstat_io_bi", 
                            "cpu_vmstat_io_bo",
-                           "cpu_vmstat_mem_buff",
-                           "cpu_vmstat_mem_swpd",
                            "cpu_vmstat_mem_free",
+                           "cpu_vmstat_procs_b",
                            "cpu_vmstat_procs_r", 
                            "cpu_vmstat_system_in", 
                            "cpu_vmstat_system_cs"]
@@ -131,15 +130,14 @@ def main():
                            "gpu_dcgm_pcie_tx_throughput", 
                            "gpu_dcgm_nvlink_bandwidth_total", 
                            "gpu_dcgm_fp16_active", 
-                           "gpu_dcgm_fp32_active", 
-                           "gpu_dcgm_fp64_active"]
+                           "gpu_dcgm_fp32_active"]
     
     print(f"[Python] Processing: {job_id}, {user_id}, {machine_id}")
     
     if machine_id == "perlmutter cpu":
         metrics_list_profile = metrics_profile_cpu
     elif machine_id == "perlmutter gpu":
-        metrics_list_profile = metrics_profile_cpu + metrics_profile_gpu
+        metrics_list_profile = metrics_profile_gpu
     else:
         raise Exception("Sorry, machine id is not recognized")
     

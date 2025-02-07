@@ -31,7 +31,7 @@ metrics_descriptions = {
     "gpu_dcgm_fb_used": "Framebuffer memory used (in MB)",
     "gpu_dcgm_fp16_active": "Ratio of cycles the fp16 pipes are active (%)",
     "gpu_dcgm_fp32_active": "Ratio of cycles the fp32 pipes are active (%)",
-    "gpu_dcgm_fp64_active":" Ratio of cycles the fp64 pipes are active (%)",
+    "gpu_dcgm_fp64_active": "Ratio of cycles the fp64 pipes are active (%)",
     "gpu_dcgm_gpu_temp": "GPU temperature (in C)",
     "gpu_dcgm_gpu_utilization": "GPU utilization (%)",
     "gpu_dcgm_low_util_violation": "Throttling duration due to low utilization (us)",
