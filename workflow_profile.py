@@ -95,6 +95,8 @@ def main():
                         help='indicate the user id associate with job for profiling')
     parser.add_argument('-m', '--machine_id', action='store', type=str,
                         help='indicate the machine id where job run at, [cpu, gpu]')
+    parser.add_argument('-o', '--output_dir', action='store', type=str,
+                        help='indicate the output directory to store profiled results')
     parser.add_argument('-tu', '--profile_time_unit', action='store', type=str, choices=["ns", "s"],
                         help='indicate the time unit for profiling')
     parser.add_argument('-utc', '--profile_time_utc', action='store', type=bool,
@@ -108,6 +110,7 @@ def main():
     job_id = args.job_id
     user_id = args.user_id
     machine_id = args.machine_id
+    output_dir = args.output_dir
     profile_time_unit = args.profile_time_unit
     profile_time_utc = args.profile_time_utc
     metric_plot = args.metric_plot
@@ -155,7 +158,7 @@ def main():
                                        profile_time_unit, 
                                        profile_time_utc)
     
-    job_folder = os.getcwd() + "/profile_results/" + job_id + "-" + machine_id.split()[-1]
+    job_folder = output_dir + "/" + job_id + "-" + machine_id.split()[-1]
     create_folder(job_folder)
 
     # Plot the profile data
