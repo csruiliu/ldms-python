@@ -81,7 +81,11 @@ def fetch_metrics(session,
 
     except HTTPError as http_err:
         print(f"HTTP error occurred {http_err}") 
-    
+        try:
+            print("Details:", response.json())
+        except:
+            print("No details provided.")
+            
     except Exception as err:
         print(f"error: {err}")
 
