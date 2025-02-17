@@ -58,13 +58,13 @@ def output_csv(query_results, project_id, output_dir, output_overwrite):
         if output_overwrite:
             os.remove(output_file)
             print("Remove existed CSV file")
+            query_results.to_csv(output_file, index=False)
         else:
             print("Append existed CSV file")
+            query_results.to_csv(output_file, mode='a', index=False, header=False)
     else:
+        query_results.to_csv(output_file, index=False)
         print("Output CSV doesn't exist and create it")
-
-    query_results.to_csv(output_file, index=False)
-    
 
 def main():
     ###################################
