@@ -92,7 +92,6 @@ def main():
     # Create a database connection
     conn = create_connection(sqlite_db)
     query_results = query_jobs(conn, project_id, state)
-    print(query_results)
     output_csv(query_results, project_id, output_dir, output_overwrite)
     
     conn.close()
