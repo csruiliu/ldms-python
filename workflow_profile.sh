@@ -2,18 +2,21 @@
 
 # Function to display usage information
 usage() {
-    echo "Usage: $0 -i input_csv -o output_dir"
+    echo "Usage: $0 -i input_csv -o output_dir -m [cpu, gpu, <single_metric>]"
     exit 1
 }
 
 # Parse command-line arguments using getopts
-while getopts ":i:o:" opt; do
+while getopts ":i:o:m:" opt; do
     case "${opt}" in
         i)
             CSV_FILE=${OPTARG}
             ;;
         o)
             RESULTS_FOLDER=${OPTARG}
+            ;;
+        m)
+            METRIC=${OPTARG}
             ;;
         *)
             usage
@@ -47,6 +50,10 @@ if [ ! -f "$CSV_FILE" ]; then
     exit 1
 fi
 
+# Decide metric for profiling
+
+
+
 start_time=$(date +%s)
 
 # Read the CSV file line by line (skipping the header)
@@ -54,7 +61,13 @@ tail -n +2 "$CSV_FILE" | while IFS=, read -r job user machine misc
 do
     echo "[Bash] Processing: $job, $user, $machine"
     MACHINE_REFINE=${machine//\"/}
-    python3 workflow_profile.py -j "$job" -u "$user" -m "$MACHINE_REFINE" -o "$RESULTS_FOLDER" -tu "s" -utc "True" -pf "png"
+    if [ "$METRIC" == "cpu" ]; then
+        python3 workflow_profile.py -j "$job" -u "$user" -m "$MACHINE_REFINE" -o "$RESULTS_FOLDER" -tu "s" -utc "True" -pf "png" --metric_cpu
+    elif [ "$METRIC" == "gpu" ]; then 
+        python3 workflow_profile.py -j "$job" -u "$user" -m "$MACHINE_REFINE" -o "$RESULTS_FOLDER" -tu "s" -utc "True" -pf "png" --metric_gpu
+    else 
+        python3 workflow_profile.py -j "$job" -u "$user" -m "$MACHINE_REFINE" -o "$RESULTS_FOLDER" -tu "s" -utc "True" -pf "png" --metric_single "$METRIC"
+    
     # add some gap between any two requests to avoid some potential internal rate limit
     sleep 2
 done

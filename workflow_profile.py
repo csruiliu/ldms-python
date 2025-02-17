@@ -93,16 +93,20 @@ def main():
                         help='indicate the job id you want to profile')
     parser.add_argument('-u', '--user_id', action='store', type=str,
                         help='indicate the user id associate with job for profiling')
-    parser.add_argument('-m', '--machine_id', action='store', type=str,
+    parser.add_argument('-m', '--machine_id', action='store', type=str, choices=["perlmutter cpu", "perlmutter gpu"]
                         help='indicate the machine id where job run at, [cpu, gpu]')
     parser.add_argument('-o', '--output_dir', action='store', type=str,
                         help='indicate the output directory to store profiled results')
+    parser.add_argument('--metric_single', action='store', type=str,
+                        help='indicate the single metric for profiling')
+    parser.add_argument('--metric_cpu', action='store_true', type=bool, default=False,
+                        help='indicate the cpu-oriented metrics for profiling')
+    parser.add_argument('--metric_gpu', action='store_true', type=bool, default=False,
+                        help='indicate the gpu-oriented metrics for profiling')
     parser.add_argument('-tu', '--profile_time_unit', action='store', type=str, choices=["ns", "s"],
                         help='indicate the time unit for profiling')
-    parser.add_argument('-utc', '--profile_time_utc', action='store', type=bool,
+    parser.add_argument('-utc', '--profile_time_utc', action='store_true', type=bool,
                         help='indicate if utc time format is applied')
-    parser.add_argument('-mp', '--metric_plot', action='store', type=str,
-                        help='indicate the targeted metric for plotting')
     parser.add_argument('-pf', '--plot_format', action='store', type=str, choices=["png", "pdf", "svg", "eps"],
                         help='indicate the format for the plots')
     args = parser.parse_args()
@@ -113,7 +117,9 @@ def main():
     output_dir = args.output_dir
     profile_time_unit = args.profile_time_unit
     profile_time_utc = args.profile_time_utc
-    metric_plot = args.metric_plot
+    metric_single = args.metric_single
+    metric_cpu = args.metric_cpu
+    metric_gpu = args.metric_gpu
     plot_format = args.plot_format
 
     metrics_profile_cpu = ["cpu_vmstat_cpu_id", 
@@ -137,16 +143,19 @@ def main():
     
     print(f"[Python] Processing: {job_id}, {user_id}, {machine_id}")
     
-    if machine_id == "perlmutter cpu":
-        metrics_list_profile = metrics_profile_cpu
-    elif machine_id == "perlmutter gpu":
-        metrics_list_profile = metrics_profile_gpu
-    else:
-        raise Exception("Sorry, machine id is not recognized")
-    
     # setup LDMS client
     client_session = client_setup()
 
+    if metric_single is None:
+        metrics_list_profile = [metric_single]
+    else:
+        if metric_cpu:
+            metrics_list_profile = metrics_profile_cpu
+        elif metric_gpu:
+            metrics_list_profile = metrics_profile_gpu
+        else:
+            raise ValueError("Please indicate single or cpu-oriented or gpu-oriented metrics")    
+    
     try:
         df_profile = fetch_profile(client_session, user_id, job_id, machine_id, metrics_list_profile)
     except ValueError as e:
@@ -162,14 +171,10 @@ def main():
     create_folder(job_folder)
 
     # Plot the profile data
-    if metric_plot is None:
-        for m in metrics_list_profile:
-            output_path = job_folder + "/" + m
-            plot_job(df_profile_refine, output_path, m, plot_format)
-    else:
-        output_path = job_folder + "/" + metric_plot
-        plot_job(df_profile_refine, output_path, metric_plot, plot_format)
-    
+    for m in metrics_list_profile:
+        output_path = job_folder + "/" + m
+        plot_job(df_profile_refine, output_path, m, plot_format)
+        
     
 if __name__=="__main__":
     main()
