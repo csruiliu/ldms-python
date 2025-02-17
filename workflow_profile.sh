@@ -58,11 +58,11 @@ do
     echo "[Bash] Processing: $job, $user, $machine"
     MACHINE_REFINE=${machine//\"/}
     if [ "$METRIC" == "cpu" ]; then
-        python3 workflow_profile.py -j "$job" -u "$user" -m "$MACHINE_REFINE" -o "$RESULTS_FOLDER" -tu "s" -utc "True" -pf "png" --metric_cpu
+        python3 workflow_profile.py -j "$job" -u "$user" -m "$MACHINE_REFINE" -o "$RESULTS_FOLDER" -tu "s" -pf "png" --metric_cpu -utc
     elif [ "$METRIC" == "gpu" ]; then 
-        python3 workflow_profile.py -j "$job" -u "$user" -m "$MACHINE_REFINE" -o "$RESULTS_FOLDER" -tu "s" -utc "True" -pf "png" --metric_gpu
+        python3 workflow_profile.py -j "$job" -u "$user" -m "$MACHINE_REFINE" -o "$RESULTS_FOLDER" -tu "s" -pf "png" --metric_gpu -utc
     else 
-        python3 workflow_profile.py -j "$job" -u "$user" -m "$MACHINE_REFINE" -o "$RESULTS_FOLDER" -tu "s" -utc "True" -pf "png" --metric_single "$METRIC"
+        python3 workflow_profile.py -j "$job" -u "$user" -m "$MACHINE_REFINE" -o "$RESULTS_FOLDER" -tu "s" -pf "png" --metric_single "$METRIC" -utc
     fi
     # add some gap between any two requests to avoid some potential internal rate limit
     sleep 2

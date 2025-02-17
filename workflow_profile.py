@@ -99,13 +99,13 @@ def main():
                         help='indicate the output directory to store profiled results')
     parser.add_argument('--metric_single', action='store', type=str,
                         help='indicate the single metric for profiling')
-    parser.add_argument('--metric_cpu', action='store_true', type=bool, default=False,
+    parser.add_argument('--metric_cpu', action='store_true',
                         help='indicate the cpu-oriented metrics for profiling')
-    parser.add_argument('--metric_gpu', action='store_true', type=bool, default=False,
+    parser.add_argument('--metric_gpu', action='store_true',
                         help='indicate the gpu-oriented metrics for profiling')
     parser.add_argument('-tu', '--profile_time_unit', action='store', type=str, choices=["ns", "s"],
                         help='indicate the time unit for profiling')
-    parser.add_argument('-utc', '--profile_time_utc', action='store_true', type=bool,
+    parser.add_argument('-utc', '--profile_time_utc', action='store_true',
                         help='indicate if utc time format is applied')
     parser.add_argument('-pf', '--plot_format', action='store', type=str, choices=["png", "pdf", "svg", "eps"],
                         help='indicate the format for the plots')
