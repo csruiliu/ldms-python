@@ -41,6 +41,9 @@ def query_jobs(db_conn, project_id, state):
     results = cursor.fetchall()
     
     result_df = pd.DataFrame(results, columns=selected_cols)
+    
+    # Replace values containing 'gpu' with 'perlmutter_gpu' in the 'Partition' column
+    result_df.loc[result_df['Partition'].str.contains('gpu'), 'Partition'] = "perlmutter gpu"
 
     return result_df
 
