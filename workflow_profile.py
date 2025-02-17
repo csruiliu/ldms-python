@@ -93,7 +93,7 @@ def main():
                         help='indicate the job id you want to profile')
     parser.add_argument('-u', '--user_id', action='store', type=str,
                         help='indicate the user id associate with job for profiling')
-    parser.add_argument('-m', '--machine_id', action='store', type=str, choices=["perlmutter cpu", "perlmutter gpu"]
+    parser.add_argument('-m', '--machine_id', action='store', type=str, choices=["perlmutter cpu", "perlmutter gpu"],
                         help='indicate the machine id where job run at, [cpu, gpu]')
     parser.add_argument('-o', '--output_dir', action='store', type=str,
                         help='indicate the output directory to store profiled results')
