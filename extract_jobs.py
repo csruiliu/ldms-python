@@ -79,7 +79,7 @@ def main():
                         help='indicate job state for querying (default: COMPLETED).')
     parser.add_argument('-o', '--output_dir', action='store', type=str,
                         help='indicate the output directory to store csv file')
-    parser.add_argument('--output_overrwite', action='store', type=bool, default=False,
+    parser.add_argument('--output_overrwite', action='store_true',
                         help='indicate the if the output csv file will be overwriten')
     args = parser.parse_args()
 
