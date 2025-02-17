@@ -50,10 +50,6 @@ if [ ! -f "$CSV_FILE" ]; then
     exit 1
 fi
 
-# Decide metric for profiling
-
-
-
 start_time=$(date +%s)
 
 # Read the CSV file line by line (skipping the header)
@@ -67,7 +63,7 @@ do
         python3 workflow_profile.py -j "$job" -u "$user" -m "$MACHINE_REFINE" -o "$RESULTS_FOLDER" -tu "s" -utc "True" -pf "png" --metric_gpu
     else 
         python3 workflow_profile.py -j "$job" -u "$user" -m "$MACHINE_REFINE" -o "$RESULTS_FOLDER" -tu "s" -utc "True" -pf "png" --metric_single "$METRIC"
-    
+    fi
     # add some gap between any two requests to avoid some potential internal rate limit
     sleep 2
 done
