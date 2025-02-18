@@ -161,15 +161,20 @@ def main():
     except ValueError as e:
         print(f"Error processing {job_id}: {e}")
 
+    job_folder = output_dir + "/" + job_id + "-" + machine_id.split()[-1]
+    create_folder(job_folder)
+
+    # Persist fetched data as parquet format
+    data_persist_name = job_id + "-" + ("cpu" if metric_cpu else "gpu")
+    data_persist_path = job_folder + "/" + data_persist_name
+    df_profile.to_parquet(data_persist_path, index=False, compression='snappy')
+    
     # Profile the workflow
     df_profile_refine = refine_profile(df_profile, 
                                        metrics_list_profile, 
                                        profile_time_unit, 
                                        profile_time_utc)
     
-    job_folder = output_dir + "/" + job_id + "-" + machine_id.split()[-1]
-    create_folder(job_folder)
-
     # Plot the profile data
     for m in metrics_list_profile:
         output_path = job_folder + "/" + m
