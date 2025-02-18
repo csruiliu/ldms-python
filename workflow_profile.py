@@ -147,14 +147,14 @@ def main():
     client_session = client_setup()
 
     if metric_single is None:
-        metrics_list_profile = [metric_single]
-    else:
         if metric_cpu:
             metrics_list_profile = metrics_profile_cpu
         elif metric_gpu:
             metrics_list_profile = metrics_profile_gpu
         else:
-            raise ValueError("Please indicate single or cpu-oriented or gpu-oriented metrics")    
+            raise ValueError("Please indicate single or cpu-oriented or gpu-oriented metrics")
+    else:
+        metrics_list_profile = [metric_single]
     
     try:
         df_profile = fetch_profile(client_session, user_id, job_id, machine_id, metrics_list_profile)
