@@ -71,6 +71,12 @@ def main():
     profile_time_unit = args.profile_time_unit
     profile_time_utc = args.profile_time_utc
 
+    parquet_file = parquet_path.split("/")[-1]
+    job_name = parquet_file.split(".")[0]
+    job_info = job_name.split("-")
+    job_id = job_info[0]
+    machine_id = job_info[1]
+
     metrics_profile_cpu = ["cpu_vmstat_cpu_id", 
                            "cpu_vmstat_io_bi", 
                            "cpu_vmstat_io_bo",
@@ -90,6 +96,13 @@ def main():
                            "gpu_dcgm_fp16_active", 
                            "gpu_dcgm_fp32_active"]
     
+    if machine_id == "cpu":
+        metrics_list_profile = metrics_profile_cpu
+    elif machine_id == "gpu":
+        metrics_list_profile = metrics_profile_gpu
+    else:
+        raise ValueError("the parquet cannot be deserialized since the machine id cannot be recognized")
+
     profiled_df = pd.read_parquet(parquet_path, engine='pyarrow')
     
     # Profile the workflow
@@ -97,19 +110,6 @@ def main():
                                        metrics_list_profile, 
                                        profile_time_unit, 
                                        profile_time_utc)
-
-    parquet_file = parquet_path.split("/")[-1]
-    job_name = parquet_file.split(".")[0]
-    job_info = job_name.split("-")
-    job_id = job_info[0]
-    machine_id = job_info[1]
-
-    if machine_id == "cpu":
-        metrics_list_profile = metrics_profile_cpu
-    elif machine_id == "gpu":
-        metrics_list_profile = metrics_profile_gpu
-    else:
-        raise ValueError("the parquet cannot be deserialized since the machine id cannot be recognized")
     
     job_folder = output_dir + "/" + job_id + "-" + machine_id.split()[-1]
 
