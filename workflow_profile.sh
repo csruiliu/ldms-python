@@ -64,6 +64,17 @@ do
     else 
         python3 workflow_profile.py -j "$job" -u "$user" -m "$MACHINE_REFINE" -o "$RESULTS_FOLDER" -tu "s" -pf "png" --metric_single "$METRIC" -utc
     fi
+    
+    # Check if the folder is empty
+    if [ -z "$(ls -A $$RESULTS_FOLDER)" ]; then
+        # If the folder is empty, delete it
+        rmdir $RESULTS_FOLDER
+        if [ $? -eq 0 ]; then
+            echo "Folder $RESULTS_FOLDER is empty, no profiled result, and has been deleted."
+        else
+            echo "Error: Failed to delete directory"
+        fi
+    fi
     # add some gap between any two requests to avoid some potential internal rate limit
     sleep 2
 done
