@@ -56,14 +56,20 @@ def main():
     # get all parameters
     ###################################
     parser = argparse.ArgumentParser()
-    parser.add_argument('-f', '--parquet_file', action='store', type=str,
+    parser.add_argument('-p', '--parquet_path', action='store', type=str,
                         help='indicate the profiled parquet file for analysis')
     parser.add_argument('-o', '--output_dir', action='store', type=str,
                         help='indicate the output directory to store profiled results')
+    parser.add_argument('-tu', '--profile_time_unit', action='store', type=str, choices=["ns", "s"],
+                        help='indicate the time unit for profiling')
+    parser.add_argument('-utc', '--profile_time_utc', action='store_true',
+                        help='indicate if utc time format is applied')
     args = parser.parse_args()
 
-    parquet_file = args.parquet_file
+    parquet_path = args.parquet_path
     output_dir = args.output_dir
+    profile_time_unit = args.profile_time_unit
+    profile_time_utc = args.profile_time_utc
 
     metrics_profile_cpu = ["cpu_vmstat_cpu_id", 
                            "cpu_vmstat_io_bi", 
@@ -84,13 +90,20 @@ def main():
                            "gpu_dcgm_fp16_active", 
                            "gpu_dcgm_fp32_active"]
     
-    job_name = parquet_file.split(parquet_file, ".")[0]
-    job_info = job_name.split(job_name, "-")
+    profiled_df = pd.read_parquet(parquet_path, engine='pyarrow')
+    
+    # Profile the workflow
+    df_profile_refine = refine_profile(profiled_df, 
+                                       metrics_list_profile, 
+                                       profile_time_unit, 
+                                       profile_time_utc)
+
+    parquet_file = parquet_path.split("/")[-1]
+    job_name = parquet_file.split(".")[0]
+    job_info = job_name.split("-")
     job_id = job_info[0]
     machine_id = job_info[1]
 
-    profiled_df = pd.read_parquet(parquet_file, engine='pyarrow')
-    
     if machine_id == "cpu":
         metrics_list_profile = metrics_profile_cpu
     elif machine_id == "gpu":
@@ -103,7 +116,7 @@ def main():
     # Plot the profile data
     for m in metrics_list_profile:
         output_path = job_folder + "/" + m
-        plot_job(profiled_df, output_path, m, "png")
+        plot_job(df_profile_refine, output_path, m, "png")
         
     
 if __name__=="__main__":
