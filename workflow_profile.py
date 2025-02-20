@@ -166,7 +166,7 @@ def main():
 
     # Persist fetched data as parquet format
     data_persist_name = job_id + "-" + ("cpu" if metric_cpu else "gpu")
-    data_persist_path = job_folder + "/" + data_persist_name
+    data_persist_path = job_folder + "/" + data_persist_name + ".parquet"
     df_profile.to_parquet(data_persist_path, index=False, compression='snappy')
     
     # Profile the workflow
