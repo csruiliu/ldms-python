@@ -65,7 +65,7 @@ do
         python3 workflow_profile.py -j "$job" -u "$user" -m "$MACHINE_REFINE" -o "$RESULTS_FOLDER" -tu "s" -pf "png" --metric_single "$METRIC" -utc
     fi
 
-    JOB_FOLDER="$$RESULTS_FOLDER/$job-$METRIC"
+    JOB_FOLDER="$RESULTS_FOLDER/$job-$METRIC"
     # Check if the folder is empty
     if [ -z "$(ls -A $JOB_FOLDER)" ]; then
         # If the folder is empty, delete it
