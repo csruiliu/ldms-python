@@ -57,13 +57,8 @@ tail -n +2 "$CSV_FILE" | while IFS=, read -r job user machine misc
 do
     echo "[Bash] Processing: $job, $user, $machine"
     MACHINE_REFINE=${machine//\"/}
-    if [ "$METRIC" == "cpu" ]; then
-        python3 workflow_profile.py -j "$job" -u "$user" -m "$MACHINE_REFINE" -o "$RESULTS_FOLDER" -tu "s" -pf "png" --metric_cpu -utc
-    elif [ "$METRIC" == "gpu" ]; then 
-        python3 workflow_profile.py -j "$job" -u "$user" -m "$MACHINE_REFINE" -o "$RESULTS_FOLDER" -tu "s" -pf "png" --metric_gpu -utc
-    else 
-        python3 workflow_profile.py -j "$job" -u "$user" -m "$MACHINE_REFINE" -o "$RESULTS_FOLDER" -tu "s" -pf "png" --metric_single "$METRIC" -utc
-    fi
+
+    python3 workflow_profile.py -j "$job" -u "$user" -m "$MACHINE_REFINE" -o "$RESULTS_FOLDER" -p $METRIC -tu "s" -pf "png" 
 
     JOB_FOLDER="$RESULTS_FOLDER/$job-$METRIC"
     # Check if the folder is empty

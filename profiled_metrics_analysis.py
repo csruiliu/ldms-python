@@ -75,7 +75,7 @@ def main():
     job_name = parquet_file.split(".")[0]
     job_info = job_name.split("-")
     job_id = job_info[0]
-    machine_id = job_info[1]
+    profile_metric = job_info[1]
 
     metrics_profile_cpu = ["cpu_vmstat_cpu_id", 
                            "cpu_vmstat_io_bi", 
@@ -96,9 +96,9 @@ def main():
                            "gpu_dcgm_fp16_active", 
                            "gpu_dcgm_fp32_active"]
     
-    if machine_id == "cpu":
+    if profile_metric == "cpu":
         metrics_list_profile = metrics_profile_cpu
-    elif machine_id == "gpu":
+    elif profile_metric == "gpu":
         metrics_list_profile = metrics_profile_gpu
     else:
         raise ValueError("the parquet cannot be deserialized since the machine id cannot be recognized")
@@ -111,7 +111,7 @@ def main():
                                        profile_time_unit, 
                                        profile_time_utc)
     
-    job_folder = output_dir + "/" + job_id + "-" + machine_id.split()[-1]
+    job_folder = output_dir + "/" + job_id + "-" + profile_metric
 
     # Plot the profile data
     for m in metrics_list_profile:

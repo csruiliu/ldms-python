@@ -97,12 +97,8 @@ def main():
                         help='indicate the machine id where job run at, [cpu, gpu]')
     parser.add_argument('-o', '--output_dir', action='store', type=str,
                         help='indicate the output directory to store profiled results')
-    parser.add_argument('--metric_single', action='store', type=str,
-                        help='indicate the single metric for profiling')
-    parser.add_argument('--metric_cpu', action='store_true',
-                        help='indicate the cpu-oriented metrics for profiling')
-    parser.add_argument('--metric_gpu', action='store_true',
-                        help='indicate the gpu-oriented metrics for profiling')
+    parser.add_argument('-p', '--profile_metric', action='store', type=str,
+                        help='indicate the metric(s) for profiling')
     parser.add_argument('-tu', '--profile_time_unit', action='store', type=str, choices=["ns", "s"],
                         help='indicate the time unit for profiling')
     parser.add_argument('-utc', '--profile_time_utc', action='store_true',
@@ -115,11 +111,9 @@ def main():
     user_id = args.user_id
     machine_id = args.machine_id
     output_dir = args.output_dir
+    profile_metric = args.profile_metric
     profile_time_unit = args.profile_time_unit
     profile_time_utc = args.profile_time_utc
-    metric_single = args.metric_single
-    metric_cpu = args.metric_cpu
-    metric_gpu = args.metric_gpu
     plot_format = args.plot_format
 
     metrics_profile_cpu = ["cpu_vmstat_cpu_id", 
@@ -146,26 +140,23 @@ def main():
     # setup LDMS client
     client_session = client_setup()
 
-    if metric_single is None:
-        if metric_cpu:
-            metrics_list_profile = metrics_profile_cpu
-        elif metric_gpu:
-            metrics_list_profile = metrics_profile_gpu
-        else:
-            raise ValueError("Please indicate single or cpu-oriented or gpu-oriented metrics")
-    else:
-        metrics_list_profile = [metric_single]
+    if profile_metric == "cpu":
+        metrics_list_profile = metrics_profile_cpu
+    elif profile_metric == "gpu":
+        metrics_list_profile = metrics_profile_gpu
+    else: 
+        metrics_list_profile = [profile_metric]
     
     try:
         df_profile = fetch_profile(client_session, user_id, job_id, machine_id, metrics_list_profile)
     except ValueError as e:
         print(f"Error processing {job_id}: {e}")
 
-    job_folder = output_dir + "/" + job_id + "-" + machine_id.split()[-1]
+    job_folder = output_dir + "/" + job_id + "-" + profile_metric
     create_folder(job_folder)
 
     # Persist fetched data as parquet format
-    data_persist_name = job_id + "-" + ("cpu" if metric_cpu else "gpu")
+    data_persist_name = job_id + "-" + profile_metric
     data_persist_path = job_folder + "/" + data_persist_name + ".parquet"
     df_profile.to_parquet(data_persist_path, index=False, engine='pyarrow', compression='snappy')
     
