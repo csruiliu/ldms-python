@@ -10,6 +10,18 @@ from pathlib import Path
 from metric_dict import metrics_descriptions
 
 
+def create_folder(folder_path):
+    '''
+    # Delete the folder if it exists and create a new one."""
+    if os.path.exists(folder_path):
+        shutil.rmtree(folder_path)
+    os.makedirs(folder_path)
+    '''
+    # Creates folder if it does not exist
+    if not os.path.exists(folder_path):
+        os.makedirs(folder_path)
+
+
 def check_substring(main_string, sub_string):
     return main_string.find(sub_string) != -1
 
@@ -40,13 +52,24 @@ def refine_profile(profile_df,
 def plot_job(profile_data, outpath, target_metric, plot_format):
     fig, ax = plt.subplots(figsize=(24,16))
     sns.set_context('poster')
-    sns.lineplot(x="Time",y=metrics_descriptions.get(target_metric), 
-                 hue="hostname",data=profile_data)
-    plt.rcParams.update({'font.size': 24})
-    plt.xticks(rotation=30, fontsize=24)
-    plt.xlabel('Date-Time', fontsize=24)
-    plt.ylabel(metrics_descriptions.get(target_metric), fontsize=24)
-    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H-%M-%S'))
+    
+    if target_metric == "cpu_vmstat_cpu_id":
+        ax.set_ylim(0, 110)
+    
+    sns.lineplot(x="Time",
+                 y=metrics_descriptions.get(target_metric), 
+                 hue="hostname",
+                 data=profile_data)
+    
+    # plt.rcParams.update({'font.size': 24})
+    # plt.xticks(rotation=30, fontsize=24)
+    plt.xticks(fontsize=30)
+    plt.yticks(fontsize=30)
+
+    plt.xlabel('Date and Time', fontsize=30)
+    plt.ylabel(metrics_descriptions.get(target_metric), fontsize=30)
+    #plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H-%M-%S'))
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m-%d-%y %H:%M'))
     
     plt.savefig(outpath + "." + plot_format, format=plot_format, bbox_inches='tight', pad_inches=0.05)
     
@@ -112,6 +135,7 @@ def main():
                                        profile_time_utc)
     
     job_folder = output_dir + "/" + job_id + "-" + profile_metric
+    create_folder(job_folder)
 
     # Plot the profile data
     for m in metrics_list_profile:
