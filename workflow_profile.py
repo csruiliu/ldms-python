@@ -56,14 +56,17 @@ def refine_profile(profile_df,
                                         unit=profile_time_unit, 
                                         utc=profile_time_utc)
     
-    metrics_kb = ["cpu_vmstat_mem_buff", 
-                  "cpu_vmstat_mem_cache", 
-                  "cpu_vmstat_mem_free", 
-                  "cpu_vmstat_mem_swpd"] 
+    metrics_gb = ["cpu_vmstat_mem_free", 
+                  "cpu_vmstat_mem_swpd",
+                  "cpu_vmstat_mem_cache"] 
+
+    metrics_mb = ["cpu_vmstat_mem_buff"]
 
     for m in metrics_list:
-        if m in metrics_kb:
+        if m in metrics_gb:
             profile_df[metrics_descriptions.get(m)] = profile_df[m] / 1.0e+6
+        elif m in metrics_mb:
+            profile_df[metrics_descriptions.get(m)] = profile_df[m] / 1.0e+3
         else:
             profile_df[metrics_descriptions.get(m)] = profile_df[m]
 
@@ -75,12 +78,16 @@ def plot_job(profile_data, outpath, target_metric, plot_format):
     sns.set_context('poster')
     sns.lineplot(x="Time",y=metrics_descriptions.get(target_metric), 
                  hue="hostname",data=profile_data)
-    plt.rcParams.update({'font.size': 24})
-    plt.xticks(rotation=30, fontsize=24)
-    plt.xlabel('Date-Time', fontsize=24)
-    plt.ylabel(metrics_descriptions.get(target_metric), fontsize=24)
-    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H-%M-%S'))
-    
+    plt.rcParams.update({'font.size': 30})
+    # plt.xticks(rotation=30, fontsize=24)
+    plt.xticks(fontsize=30)
+    plt.yticks(fontsize=30)
+
+    plt.xlabel('Date and Time', fontsize=30)
+    plt.ylabel(metrics_descriptions.get(target_metric), fontsize=30)
+    # plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H-%M-%S'))
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m-%d-%y %H:%M'))
+
     plt.savefig(outpath + "." + plot_format, format=plot_format, bbox_inches='tight', pad_inches=0.05)
     
 

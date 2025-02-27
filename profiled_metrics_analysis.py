@@ -35,14 +35,17 @@ def refine_profile(profile_df,
                                         unit=profile_time_unit, 
                                         utc=profile_time_utc)
     
-    metrics_kb = ["cpu_vmstat_mem_buff", 
-                  "cpu_vmstat_mem_cache", 
-                  "cpu_vmstat_mem_free", 
-                  "cpu_vmstat_mem_swpd"] 
+    metrics_gb = ["cpu_vmstat_mem_free", 
+                  "cpu_vmstat_mem_swpd",
+                  "cpu_vmstat_mem_cache"] 
+
+    metrics_mb = ["cpu_vmstat_mem_buff"]
 
     for m in metrics_list:
-        if m in metrics_kb:
+        if m in metrics_gb:
             profile_df[metrics_descriptions.get(m)] = profile_df[m] / 1.0e+6
+        elif m in metrics_mb:
+            profile_df[metrics_descriptions.get(m)] = profile_df[m] / 1.0e+3
         else:
             profile_df[metrics_descriptions.get(m)] = profile_df[m]
 
@@ -50,12 +53,20 @@ def refine_profile(profile_df,
 
 
 def plot_job(profile_data, outpath, target_metric, plot_format):
-    fig, ax = plt.subplots(figsize=(24,16))
+    fig, ax = plt.subplots(figsize=(36,20))
     sns.set_context('poster')
     
     if target_metric == "cpu_vmstat_cpu_id":
         ax.set_ylim(0, 110)
-    
+    elif target_metric == "cpu_vmstat_mem_free":
+        ax.set_ylim(0, 550)
+    elif target_metric == "cpu_vmstat_mem_buff":
+        ax.set_ylim(0, 10)
+    elif target_metric == "cpu_vmstat_mem_cache":
+        ax.set_ylim(0, 400)
+    else:
+        print("No need to set ylim")
+
     sns.lineplot(x="Time",
                  y=metrics_descriptions.get(target_metric), 
                  hue="hostname",
@@ -63,14 +74,15 @@ def plot_job(profile_data, outpath, target_metric, plot_format):
     
     # plt.rcParams.update({'font.size': 24})
     # plt.xticks(rotation=30, fontsize=24)
-    plt.xticks(fontsize=30)
-    plt.yticks(fontsize=30)
+    plt.xticks(fontsize=36)
+    plt.yticks(fontsize=36)
 
-    plt.xlabel('Date and Time', fontsize=30)
-    plt.ylabel(metrics_descriptions.get(target_metric), fontsize=30)
-    #plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H-%M-%S'))
-    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m-%d-%y %H:%M'))
+    plt.xlabel('Date and Time', fontsize=48)
+    plt.ylabel(metrics_descriptions.get(target_metric), fontsize=48)
     
+    # plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m-%d-%y %H:%M'))
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%m-%d %H:%M'))
+
     plt.savefig(outpath + "." + plot_format, format=plot_format, bbox_inches='tight', pad_inches=0.05)
     
 
@@ -100,14 +112,14 @@ def main():
     job_id = job_info[0]
     profile_metric = job_info[1]
 
-    metrics_profile_cpu = ["cpu_vmstat_cpu_id", 
+    metrics_profile_cpu = ["cpu_vmstat_mem_buff", 
                            "cpu_vmstat_io_bi", 
                            "cpu_vmstat_io_bo",
                            "cpu_vmstat_mem_free",
                            "cpu_vmstat_procs_b",
-                           "cpu_vmstat_procs_r", 
-                           "cpu_vmstat_system_in", 
-                           "cpu_vmstat_system_cs"]
+                           "cpu_vmstat_swap_so", 
+                           "cpu_vmstat_mem_cache", 
+                           "cpu_vmstat_swap_si"]
 
     metrics_profile_gpu = ["gpu_dcgm_gpu_utilization",
                            "gpu_dcgm_tensor_active",
