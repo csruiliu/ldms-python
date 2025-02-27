@@ -5,11 +5,9 @@ import pandas as pd
 from sqlite3 import Error
 
 # All column names in schema
-col_names = [
-    'Start', 'JobIDRaw', 'User', 'Account', 'QOS', 'Partition', 'ReservationId', 
-    'Reservation', 'Constraints', 'Submit', 'Eligible', 'End', 'ElapsedRaw', 
-    'Timelimit', 'NNodes', 'ReqCPUS', 'ReqMem', 'State', 'ExitCode', 'QueueTime'
-]
+col_names = ['Start', 'JobIDRaw', 'User', 'Account', 'QOS', 'Partition', 'ReservationId', 
+             'Reservation', 'Constraints', 'Submit', 'Eligible', 'End', 'ElapsedRaw', 
+             'Timelimit', 'NNodes', 'ReqCPUS', 'ReqMem', 'State', 'ExitCode', 'QueueTime']
 
 # Projected columns for query, make sure `selected_cols` and `projection_query` are matched
 selected_cols = ['JobIDRaw', 'User', 'Partition']
