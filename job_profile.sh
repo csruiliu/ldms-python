@@ -58,7 +58,7 @@ do
     echo "[Bash] Processing: $job, $user, $machine"
     MACHINE_REFINE=${machine//\"/}
 
-    python3 workflow_profile.py -j "$job" -u "$user" -m "$MACHINE_REFINE" -o "$RESULTS_FOLDER" -p $METRIC -tu "s" -pf "png" 
+    python3 job_profile.py -j "$job" -u "$user" -m "$MACHINE_REFINE" -o "$RESULTS_FOLDER" -p $METRIC -tu "s" -pf "png" 
 
     JOB_FOLDER="$RESULTS_FOLDER/$job-$METRIC"
     # Check if the folder is empty
